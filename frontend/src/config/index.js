@@ -4,7 +4,7 @@
 export const config = {
   // API configuration
   api: {
-    baseUrl: '/api',
+    baseUrl: 'http://localhost:8080/api',
     timeout: 30000, // 30 seconds
   },
 
