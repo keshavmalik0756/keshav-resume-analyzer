@@ -4,7 +4,9 @@
 export const config = {
   // API configuration
   api: {
-    baseUrl: 'http://localhost:8080/api',
+    baseUrl: process.env.NODE_ENV === 'production' 
+      ? 'https://keshav-resume-analyzer.onrender.com/api'
+      : 'http://localhost:8080/api',
     timeout: 30000, // 30 seconds
   },
 

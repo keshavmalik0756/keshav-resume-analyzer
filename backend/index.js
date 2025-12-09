@@ -20,7 +20,8 @@ app.use(
       process.env.FRONTEND_URL || "http://localhost:5173", 
       "http://localhost:5174",
       "http://127.0.0.1:5173",
-      "http://127.0.0.1:5174"
+      "http://127.0.0.1:5174",
+      "https://keshav-resume-analyzer.onrender.com"
     ],
     credentials: true,
     optionsSuccessStatus: 200
@@ -70,7 +71,7 @@ app.use((req, res) => {
 const server = app.listen(PORT, () => {
   console.log(`Resume Analyzer API server running on port ${PORT}`);
   console.log(`Environment: ${process.env.NODE_ENV || "development"}`);
-  console.log(`CORS enabled for origins: http://localhost:5173, http://localhost:5174`);
+  console.log(`CORS enabled for origins: http://localhost:5173, http://localhost:5174, https://keshav-resume-analyzer.onrender.com`);
 });
 
 // Graceful shutdown handling

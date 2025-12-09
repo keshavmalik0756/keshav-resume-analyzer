@@ -5,6 +5,8 @@
   "scripts": {
     "start": "node index.js",
     "dev": "node --watch index.js",
+    "build": "cd ../frontend && npm run build && cd ../backend && npx rimraf dist && mkdir dist && xcopy ..\\frontend\\dist dist /E /I /H /Y",
+    "postinstall": "npm run build",
     "test": "jest --runInBand",
     "test:watch": "jest --watch --runInBand"
   },
@@ -22,6 +24,7 @@
     "node-cache": "^5.1.2",
     "pdf-parse": "^1.1.1",
     "pdfkit": "^0.17.2",
+    "rimraf": "^6.0.1",
     "uuid": "^11.1.0",
     "ws": "^8.18.3"
   },
