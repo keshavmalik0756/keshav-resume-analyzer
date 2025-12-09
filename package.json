@@ -5,11 +5,11 @@
   "main": "backend/index.js",
   "scripts": {
     "postinstall": "npm run install:all",
-    "install:all": "cd backend && npm install && cd ../frontend && npm install",
+    "install:all": "cd backend && npm ci && cd ../frontend && npm ci",
     "dev": "concurrently \"npm run dev:backend\" \"npm run dev:frontend\"",
     "dev:backend": "cd backend && npm run dev",
     "dev:frontend": "cd frontend && npm run dev",
-    "build": "cd frontend && npm ci && npm run build && cd ../backend && npm ci && npm run build",
+    "build": "cd frontend && npm ci && npm run build && cd .. && mkdir -p public && cp -r frontend/dist/* public/",
     "start": "cd backend && npm start"
   },
   "keywords": [],

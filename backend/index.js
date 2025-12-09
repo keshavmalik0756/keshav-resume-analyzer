@@ -47,7 +47,8 @@ app.use("/api", sseRoutes);
 app.use("/api", processRoutes);
 
 // Serve static files from dist directory (after API routes)
-app.use(express.static('dist'));
+// On Vercel, static files are served from public directory
+app.use(express.static(process.env.VERCEL ? 'public' : 'dist'));
 
 // Global error handling middleware
 app.use((error, req, res, next) => {
