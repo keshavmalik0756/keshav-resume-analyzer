@@ -5,8 +5,7 @@
   "scripts": {
     "start": "node index.js",
     "dev": "node --watch index.js",
-    "build": "cd ../frontend && npm run build && cd ../backend && npx rimraf dist && mkdir dist && xcopy ..\\frontend\\dist dist /E /I /H /Y",
-    "postinstall": "npm run build",
+    "build": "cd ../frontend && npm run build && cd ../backend && npx rimraf dist && mkdir dist && cp -r ../frontend/dist/* dist/",
     "test": "jest --runInBand",
     "test:watch": "jest --watch --runInBand"
   },

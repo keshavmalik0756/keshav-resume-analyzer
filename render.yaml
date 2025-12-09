@@ -3,7 +3,7 @@ services:
     name: resume-analyzer-backend
     runtime: node
     plan: free
-    buildCommand: npm install
+    buildCommand: npm ci && npm run build
     startCommand: npm start
     envVars:
       - key: NODE_ENV

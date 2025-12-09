@@ -1,0 +1,21 @@
+{
+  "name": "resume-analyzer",
+  "version": "1.0.0",
+  "description": "Resume Analyzer - AI powered resume analysis tool",
+  "main": "backend/index.js",
+  "scripts": {
+    "postinstall": "npm run install:all",
+    "install:all": "cd backend && npm install && cd ../frontend && npm install",
+    "dev": "concurrently \"npm run dev:backend\" \"npm run dev:frontend\"",
+    "dev:backend": "cd backend && npm run dev",
+    "dev:frontend": "cd frontend && npm run dev",
+    "build": "cd frontend && npm ci && npm run build && cd ../backend && npm ci && npm run build",
+    "start": "cd backend && npm start"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "concurrently": "^9.1.0"
+  }
+}
