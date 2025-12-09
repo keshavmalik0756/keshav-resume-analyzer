@@ -40,6 +40,7 @@ router.post('/upload-and-process',
       }
 
       // Create session with file information
+      console.log(`[UPLOAD] Creating session: ${sessionId}`);
       sessionManager.createSession({
         sessionId,
         status: 'uploaded',
@@ -53,6 +54,7 @@ router.post('/upload-and-process',
           validatedAt: file.validatedAt
         }
       });
+      console.log(`[UPLOAD] Session created successfully: ${sessionId}`);
 
       // Schedule cleanup for this file (30 minutes after upload)
       fileCleanupService.scheduleCleanup(sessionId, file.path, 30 * 60 * 1000);
@@ -314,20 +316,36 @@ async function analyzeWithRetry(sessionId, resumeText, geminiService, retryCount
   } catch (error) {
     console.error(`AI analysis error (attempt ${retryCount + 1}):`, error);
     
-    if (retryCount < maxRetries) {
-      // Retry
+    // Don't retry for certain error types that won't be fixed by retrying
+    const isRetryableError = !(error.message.includes('model not found') || 
+                              error.message.includes('Unauthorized') || 
+                              error.message.includes('API key'));
+    
+    // If it's a model-related error, try to reinitialize the model
+    if (error.message.includes('model not found') && typeof geminiService.reinitializeModel === 'function') {
+      console.log('Attempting to reinitialize AI model...');
+      const reinitSuccess = geminiService.reinitializeModel();
+      if (reinitSuccess && retryCount < maxRetries) {
+        // If reinitialization was successful, retry the analysis
+        await analyzeWithRetry(sessionId, resumeText, geminiService, retryCount + 1);
+        return;
+      }
+    }
+    
+    if (isRetryableError && retryCount < maxRetries) {
+      // Retry for retryable errors
       await analyzeWithRetry(sessionId, resumeText, geminiService, retryCount + 1);
     } else {
-      // Max retries exceeded
+      // Max retries exceeded or non-retryable error
       sessionManager.updateSession(sessionId, {
         status: 'error',
-        lastError: 'AI analysis failed after multiple attempts',
+        lastError: error.message,
         retryCount: retryCount + 1
       });
-      eventBroadcaster.broadcastError(sessionId, 'AI analysis failed after multiple attempts', {
+      eventBroadcaster.broadcastError(sessionId, error.message, {
         code: 'AI_ANALYSIS_FAILED',
         stage: 'analysis',
-        retryable: false,
+        retryable: isRetryableError,
         retryCount: retryCount + 1
       });
     }

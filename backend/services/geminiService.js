@@ -7,15 +7,76 @@ class GeminiService {
     }
     
     this.genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
-    this.model = this.genAI.getGenerativeModel({ 
-      model: 'gemini-1.5-flash',
-      generationConfig: {
-        temperature: 0.7,
-        topP: 0.8,
-        topK: 40,
-        maxOutputTokens: 4096,
+    
+    // Define fallback models in order of preference
+    this.modelOptions = [
+      {
+        name: 'gemini-2.0-flash',
+        generationConfig: {
+          temperature: 0.7,
+          topP: 0.8,
+          topK: 40,
+          maxOutputTokens: 4096,
+        }
+      },
+      {
+        name: 'gemini-2.5-flash',
+        generationConfig: {
+          temperature: 0.7,
+          topP: 0.8,
+          topK: 40,
+          maxOutputTokens: 4096,
+        }
+      },
+      {
+        name: 'gemini-pro',
+        generationConfig: {
+          temperature: 0.7,
+          topP: 0.8,
+          topK: 40,
+          maxOutputTokens: 4096,
+        }
       }
-    });
+    ];
+    
+    // Try to initialize the first available model
+    this.model = this.initializeModel();
+  }
+  
+  /**
+   * Initialize the first available model from the fallback list
+   * @returns {GenerativeModel} Initialized model
+   */
+  initializeModel() {
+    for (const modelOption of this.modelOptions) {
+      try {
+        const model = this.genAI.getGenerativeModel({ 
+          model: modelOption.name,
+          generationConfig: modelOption.generationConfig
+        });
+        console.log(`Successfully initialized model: ${modelOption.name}`);
+        return model;
+      } catch (error) {
+        console.warn(`Failed to initialize model ${modelOption.name}:`, error.message);
+        continue;
+      }
+    }
+    
+    throw new Error('Failed to initialize any available AI model. Please check your API key and network connection.');
+  }
+
+  /**
+   * Reinitialize the model with the next available fallback
+   * @returns {boolean} True if reinitialization was successful
+   */
+  reinitializeModel() {
+    try {
+      this.model = this.initializeModel();
+      return true;
+    } catch (error) {
+      console.error('Failed to reinitialize model:', error.message);
+      return false;
+    }
   }
 
   /**
@@ -99,6 +160,18 @@ Provide only the JSON response, no additional text.`;
       
     } catch (error) {
       console.error('Error in Gemini AI analysis:', error);
+      
+      // Provide more specific error messages
+      if (error.status === 404) {
+        throw new Error('AI model not found. Please check if the model name is correct and available.');
+      } else if (error.status === 401) {
+        throw new Error('Unauthorized access to AI service. Please check your API key.');
+      } else if (error.status === 429) {
+        throw new Error('Rate limit exceeded. Please try again later.');
+      } else if (error.status >= 500) {
+        throw new Error('AI service temporarily unavailable. Please try again later.');
+      }
+      
       throw new Error(`AI analysis failed: ${error.message}`);
     }
   }

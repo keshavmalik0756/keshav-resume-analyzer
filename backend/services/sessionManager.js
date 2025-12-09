@@ -35,6 +35,7 @@ class SessionManager {
     };
 
     this.sessions.set(sessionId, session);
+    console.log(`[SESSION] Created session: ${sessionId}, total sessions: ${this.sessions.size}`);
     return sessionId;
   }
 
@@ -45,17 +46,21 @@ class SessionManager {
    */
   getSession(sessionId) {
     if (!sessionId || typeof sessionId !== "string") {
+      console.log(`[SESSION] Invalid session ID provided: ${sessionId}`);
       return null;
     }
 
     const session = this.sessions.get(sessionId);
+    console.log(`[SESSION] Retrieving session ${sessionId}, found in map: ${!!session}`);
 
     if (!session) {
+      console.log(`[SESSION] Session not found: ${sessionId}, available sessions: ${Array.from(this.sessions.keys()).join(', ')}`);
       return null;
     }
 
     // Check if session has expired
     if (this.isSessionExpired(session)) {
+      console.log(`[SESSION] Session expired: ${sessionId}`);
       this.deleteSession(sessionId);
       return null;
     }
@@ -197,10 +202,15 @@ class SessionManager {
    */
   isSessionExpired(session) {
     if (!session || !session.expiresAt) {
+      console.log(`[SESSION] Invalid session or missing expiresAt:`, session);
       return true;
     }
 
-    return new Date() > new Date(session.expiresAt);
+    const now = new Date();
+    const expiresAt = new Date(session.expiresAt);
+    const isExpired = now > expiresAt;
+    console.log(`[SESSION] Checking expiration - Now: ${now.toISOString()}, Expires: ${expiresAt.toISOString()}, Expired: ${isExpired}`);
+    return isExpired;
   }
 
   /**

@@ -19,4 +19,4 @@ export const config = {
     reconnectInterval: 1000, // 1 second
     maxRetries: 3,
   }
-}; 
+};

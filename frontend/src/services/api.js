@@ -56,7 +56,7 @@ export const resumeAPI = {
       }
       
       if (err.message.includes('NetworkError') || err.message.includes('Failed to fetch')) {
-        throw new APIError('Network error. Please check your internet connection.', 'NETWORK_ERROR');
+        throw new APIError('Network error. Please check your internet connection and ensure the backend server is running.', 'NETWORK_ERROR');
       }
 
       throw new APIError(err.message || 'Upload failed', 'UNKNOWN_ERROR');
@@ -69,7 +69,10 @@ export const resumeAPI = {
    * @returns {EventSource}
    */
   createEventSource: (sessionId) => {
-    return new EventSource(`${config.api.baseUrl}/events/${sessionId}`);
+    // Add retry mechanism for SSE connection
+    const url = `${config.api.baseUrl}/events/${sessionId}`;
+    console.log(`Creating SSE connection to: ${url}`);
+    return new EventSource(url);
   },
 
   /**
@@ -84,7 +87,7 @@ export const resumeAPI = {
       if (!response.ok) {
         const error = await response.json().catch(() => ({}));
         throw new APIError(
-          error.error || `Failed to get session status`,
+          error.error || `Failed to get session status: ${response.status}`,
           error.code,
           response.status
         );
@@ -93,7 +96,7 @@ export const resumeAPI = {
       return await response.json();
     } catch (err) {
       if (err instanceof APIError) throw err;
-      throw new APIError('Failed to check session status', 'STATUS_CHECK_ERROR');
+      throw new APIError('Failed to check session status. Please ensure the backend server is running.', 'STATUS_CHECK_ERROR');
     }
   },
 
@@ -104,7 +107,7 @@ export const resumeAPI = {
    */
   retryAnalysis: async (sessionId) => {
     try {
-      const response = await fetch(`${config.api.baseUrl}/process/${sessionId}/retry`, {
+      const response = await fetch(`${config.api.baseUrl}/events/${sessionId}/retry`, {
         method: 'POST'
       });
 
@@ -120,7 +123,7 @@ export const resumeAPI = {
       return await response.json();
     } catch (err) {
       if (err instanceof APIError) throw err;
-      throw new APIError('Failed to retry processing', 'RETRY_ERROR');
+      throw new APIError('Failed to retry processing. Please ensure the backend server is running.', 'RETRY_ERROR');
     }
   }
-}; 
+};

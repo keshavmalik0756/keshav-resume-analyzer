@@ -193,13 +193,16 @@ router.post('/process/:sessionId/retry', async (req, res) => {
   const { sessionId } = req.params;
   
   try {
+    console.log(`[PROCESS] Retry requested for session: ${sessionId}`);
     const session = sessionManager.getSession(sessionId);
     if (!session) {
+      console.log(`[PROCESS] Session not found for retry: ${sessionId}`);
       return res.status(404).json({
         error: 'Session not found',
         code: 'SESSION_NOT_FOUND'
       });
     }
+    console.log(`[PROCESS] Session found for retry: ${sessionId}`);
 
     // Reset session status for retry
     sessionManager.updateSession(sessionId, {

@@ -27,13 +27,14 @@ class SSEManager extends EventEmitter {
       return false;
     }
 
-    // Set SSE headers
+    // Set SSE headers with proper CORS
     res.writeHead(200, {
       'Content-Type': 'text/event-stream',
       'Cache-Control': 'no-cache',
       'Connection': 'keep-alive',
-      'Access-Control-Allow-Origin': process.env.FRONTEND_URL || 'http://localhost:5173',
-      'Access-Control-Allow-Credentials': 'true'
+      'Access-Control-Allow-Origin': '*', // Allow all origins for SSE
+      'Access-Control-Allow-Credentials': 'true',
+      'X-Accel-Buffering': 'no' // Disable buffering for nginx
     });
 
     // Send initial connection event

@@ -21,22 +21,31 @@ router.get('/events/:sessionId', (req, res) => {
   }
 
   // Check if session exists - if completed, allow connection to show results
+  console.log(`[SSE] Attempting to connect to session: ${sessionId}`);
+  
+  // Debug: Log all active sessions
+  const activeSessions = sessionManager.getActiveSessions();
+  console.log(`[SSE] Active sessions count: ${activeSessions.length}`);
+  
   const session = sessionManager.getSession(sessionId);
   if (!session) {
+    console.log(`[SSE] Session not found: ${sessionId}`);
+    // Additional debug info
+    console.log(`[SSE] All session keys:`, Array.from(sessionManager.sessions.keys()));
     return res.status(404).json({
       error: 'Session not found',
       code: 'SESSION_NOT_FOUND'
     });
   }
+  console.log(`[SSE] Session found: ${sessionId}, status: ${session.status}`);
 
-  // Create SSE connection
+  // Create SSE connection (headers will be set by SSE manager)
   const connectionCreated = sseManager.createConnection(sessionId, res);
   
   if (!connectionCreated) {
-    return res.status(500).json({
-      error: 'Failed to create SSE connection',
-      code: 'SSE_CONNECTION_FAILED'
-    });
+    // Note: If headers have already been sent by SSE manager, we can't send JSON response
+    // In this case, the connection has already been established or failed
+    return;
   }
 
   // Send current session status and any existing results
@@ -85,13 +94,23 @@ router.get('/events/:sessionId/status', (req, res) => {
   }
 
   // Get session
+  console.log(`[SSE] Status check for session: ${sessionId}`);
+  
+  // Debug: Log all active sessions
+  const activeSessions = sessionManager.getActiveSessions();
+  console.log(`[SSE] Active sessions count: ${activeSessions.length}`);
+  
   const session = sessionManager.getSession(sessionId);
   if (!session) {
+    console.log(`[SSE] Session not found for status check: ${sessionId}`);
+    // Additional debug info
+    console.log(`[SSE] All session keys:`, Array.from(sessionManager.sessions.keys()));
     return res.status(404).json({
       error: 'Session not found',
       code: 'SESSION_NOT_FOUND'
     });
   }
+  console.log(`[SSE] Session found for status check: ${sessionId}`);
 
   // Return session status
   res.json({
