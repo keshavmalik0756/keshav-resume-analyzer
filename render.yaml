@@ -3,14 +3,14 @@ services:
     name: resume-analyzer-backend
     runtime: node
     plan: free
-    buildCommand: npm ci && npm run build
-    startCommand: npm start
+    buildCommand: cd backend && npm ci
+    startCommand: cd backend && npm start
     envVars:
       - key: NODE_ENV
         value: production
       - key: PORT
         value: 8080
       - key: FRONTEND_URL
-        value: https://keshav-resume-analyzer.onrender.com
+        value: https://keshav-resume-analyzer.vercel.app
     domains:
-      - keshav-resume-analyzer.onrender.com
+      - keshav-resume-analyzer-backend.onrender.com
